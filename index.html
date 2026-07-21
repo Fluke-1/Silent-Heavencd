@@ -1,1 +1,682 @@
-a
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SILENT HEAVEN — A Place People Forgot</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Noto+Sans+Thai:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            overflow: hidden;
+            background: #000;
+            font-family: 'Cinzel', serif;
+            color: #fff;
+            cursor: default;
+        }
+
+        /* ===== BACKGROUND ===== */
+        .bg-container {
+            position: fixed; top: 0; left: 0;
+            width: 100vw; height: 100vh; z-index: 0;
+        }
+        .bg-container img {
+            width: 100%; height: 100%; object-fit: cover;
+            filter: brightness(0.3) contrast(1.3) saturate(1.4);
+            animation: bgBreath 10s ease-in-out infinite alternate;
+            transform: scale(1.15);
+        }
+        @keyframes bgBreath {
+            0% { filter: brightness(0.3) contrast(1.3) saturate(1.4); transform: scale(1.15); }
+            100% { filter: brightness(0.55) contrast(1.2) saturate(1.5); transform: scale(1.18); }
+        }
+
+        /* ===== FOG LAYERS ===== */
+        .fog-layer {
+            position: fixed; top: 0; left: 0;
+            width: 300%; height: 100%; z-index: 1;
+            pointer-events: none;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600"><defs><filter id="f"><feTurbulence type="fractalNoise" baseFrequency="0.008 0.015" numOctaves="4"/><feColorMatrix values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 0.2 0"/></filter></defs><rect width="1200" height="600" filter="url(%23f)"/></svg>');
+            background-size: 1200px 600px;
+            opacity: 0.5;
+            animation: fogDrift 50s linear infinite;
+        }
+        .fog-layer:nth-child(2) {
+            animation: fogDrift 70s linear infinite reverse;
+            opacity: 0.35;
+            top: 25%;
+        }
+        .fog-layer:nth-child(3) {
+            animation: fogDrift 35s linear infinite;
+            opacity: 0.2;
+            top: 60%;
+        }
+        @keyframes fogDrift {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-33.33%); }
+        }
+
+        /* ===== OVERLAY ===== */
+        .overlay {
+            position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%; z-index: 2;
+            pointer-events: none;
+            background:
+                radial-gradient(ellipse at 50% 15%, rgba(76, 175, 80, 0.12) 0%, transparent 55%),
+                radial-gradient(ellipse at 85% 80%, rgba(0, 0, 0, 0.95) 0%, transparent 50%),
+                radial-gradient(ellipse at 15% 80%, rgba(0, 0, 0, 0.9) 0%, transparent 50%),
+                linear-gradient(to bottom, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.02) 30%, rgba(0,0,0,0.8) 100%);
+        }
+
+        .vignette {
+            position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%; z-index: 2;
+            pointer-events: none;
+            box-shadow: inset 0 0 250px rgba(0,0,0,0.98), inset 0 0 500px rgba(0,0,0,0.7);
+        }
+
+        /* ===== AMBIENT GLOW ===== */
+        .ambient-glow {
+            position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%; z-index: 2;
+            pointer-events: none;
+            background:
+                radial-gradient(ellipse at 25% 78%, rgba(76, 175, 80, 0.12) 0%, transparent 50%),
+                radial-gradient(ellipse at 75% 68%, rgba(129, 199, 132, 0.08) 0%, transparent 45%),
+                radial-gradient(ellipse at 50% 92%, rgba(165, 214, 167, 0.07) 0%, transparent 60%);
+            animation: ambientShift 25s ease-in-out infinite alternate;
+        }
+        @keyframes ambientShift {
+            0% { opacity: 0.7; }
+            100% { opacity: 1.3; }
+        }
+
+        /* ===== LIGHT ORBS (glowing spheres) ===== */
+        .orb-container {
+            position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%; z-index: 3;
+            pointer-events: none; overflow: hidden;
+        }
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(40px);
+            animation: orbFloat linear infinite, orbPulse ease-in-out infinite;
+        }
+        @keyframes orbFloat {
+            0% { transform: translate(0, 0) scale(0.8); opacity: 0; }
+            15% { opacity: 0.6; }
+            85% { opacity: 0.6; }
+            100% { transform: translate(var(--ox), var(--oy)) scale(1.2); opacity: 0; }
+        }
+        @keyframes orbPulse {
+            0%, 100% { transform: scale(0.9); }
+            50% { transform: scale(1.1); }
+        }
+
+        /* ===== FIREFLIES ===== */
+        .fireflies-container {
+            position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%; z-index: 4;
+            pointer-events: none; overflow: hidden;
+        }
+        .firefly {
+            position: absolute;
+            border-radius: 50%;
+            opacity: 0;
+            animation: fireflyFloat linear infinite, fireflyGlow ease-in-out infinite;
+        }
+        @keyframes fireflyFloat {
+            0% { transform: translate(0, 0) scale(0.2); opacity: 0; }
+            6% { opacity: 1; }
+            94% { opacity: 1; }
+            100% { transform: translate(var(--tx), var(--ty)) scale(1.5); opacity: 0; }
+        }
+        @keyframes fireflyGlow {
+            0%, 100% { box-shadow: 0 0 2px 1px rgba(165,245,165,0.4), 0 0 5px 2px rgba(165,245,165,0.15); }
+            50% { box-shadow: 0 0 12px 5px rgba(165,245,165,1), 0 0 25px 10px rgba(165,245,165,0.6), 0 0 50px 15px rgba(165,245,165,0.25); }
+        }
+
+        /* ===== DUST MOTES ===== */
+        .dust-container {
+            position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%; z-index: 3;
+            pointer-events: none; overflow: hidden;
+        }
+        .dust-mote {
+            position: absolute;
+            border-radius: 50%;
+            animation: dustFloat linear infinite;
+        }
+        @keyframes dustFloat {
+            0% { transform: translate(0, 0) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.8; }
+            90% { opacity: 0.8; }
+            100% { transform: translate(var(--dx), var(--dy)) rotate(360deg); opacity: 0; }
+        }
+
+        /* ===== CANVAS PARTICLES ===== */
+        #particles-canvas {
+            position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%; z-index: 3;
+            pointer-events: none;
+        }
+
+        /* ===== SCANLINES ===== */
+        .scanlines {
+            position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%; z-index: 5;
+            pointer-events: none;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                rgba(0,0,0,0.04) 2px,
+                rgba(0,0,0,0.04) 4px
+            );
+            opacity: 0.35;
+        }
+
+        /* ===== CHROMATIC ABERRATION (subtle RGB split) ===== */
+        .chromatic {
+            position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%; z-index: 6;
+            pointer-events: none;
+            background: radial-gradient(ellipse at 50% 50%, transparent 40%, rgba(76,175,80,0.02) 100%);
+            mix-blend-mode: screen;
+            animation: chromaticShift 8s ease-in-out infinite;
+        }
+        @keyframes chromaticShift {
+            0%, 100% { filter: hue-rotate(0deg); }
+            50% { filter: hue-rotate(5deg); }
+        }
+
+        /* ===== MAIN CONTENT ===== */
+        .main-content {
+            position: relative; z-index: 10;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            min-height: 100vh; padding: 20px;
+        }
+
+        /* ===== LOGO ===== */
+        .logo-section {
+            text-align: center;
+            margin-bottom: 70px;
+            animation: revealLogo 3s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+            opacity: 0;
+        }
+        @keyframes revealLogo {
+            0% { opacity: 0; transform: translateY(60px) scale(0.9); filter: blur(15px) brightness(2); }
+            50% { opacity: 0.5; filter: blur(5px) brightness(1.5); }
+            100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0) brightness(1); }
+        }
+
+        .logo-title-main {
+            font-family: 'Cinzel Decorative', 'Cinzel', serif;
+            font-size: clamp(3rem, 9vw, 7rem);
+            font-weight: 900;
+            letter-spacing: 0.35em;
+            color: #fff;
+            text-shadow:
+                0 0 20px rgba(255,255,255,0.8),
+                0 0 60px rgba(255,255,255,0.4),
+                0 0 120px rgba(76, 175, 80, 0.6),
+                0 0 200px rgba(76, 175, 80, 0.3),
+                0 0 300px rgba(76, 175, 80, 0.1);
+            position: relative;
+            display: inline-block;
+            line-height: 1.1;
+            background: linear-gradient(180deg, #ffffff 0%, #e8f5e9 30%, #c8e6c9 60%, #a5d6a7 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: titleShimmer 4s ease-in-out infinite alternate;
+        }
+        @keyframes titleShimmer {
+            0% { filter: brightness(1); }
+            100% { filter: brightness(1.3); }
+        }
+
+        .logo-divider {
+            width: 0;
+            height: 2px;
+            margin: 25px auto 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.95), #a5d6a7, rgba(255,255,255,0.95), transparent);
+            animation: dividerExpand 2.5s cubic-bezier(0.22, 1, 0.36, 1) 2s forwards;
+            box-shadow: 0 0 20px rgba(165, 214, 167, 0.6), 0 0 40px rgba(76, 175, 80, 0.4), 0 0 80px rgba(76, 175, 80, 0.2);
+        }
+        @keyframes dividerExpand {
+            0% { width: 0; opacity: 0; }
+            100% { width: min(70%, 500px); opacity: 1; }
+        }
+
+        .logo-subtitle {
+            font-family: 'Playfair Display', serif;
+            font-style: italic;
+            font-size: clamp(1rem, 3vw, 1.6rem);
+            letter-spacing: 0.5em;
+            color: rgba(255,255,255,0.5);
+            margin-top: 22px;
+            text-shadow: 0 0 20px rgba(255,255,255,0.2), 0 0 40px rgba(76,175,80,0.1);
+            animation: fadeIn 2.5s ease-out 2.8s both;
+        }
+
+        /* ===== COUNTDOWN ===== */
+        .countdown-section {
+            margin: 20px 0;
+            animation: fadeInUp 2.5s cubic-bezier(0.22, 1, 0.36, 1) 3.2s both;
+        }
+
+        .countdown-label {
+            text-align: center;
+            font-size: clamp(0.55rem, 1.2vw, 0.75rem);
+            letter-spacing: 0.7em;
+            color: rgba(255,255,255,0.3);
+            margin-bottom: 30px;
+            text-transform: uppercase;
+            animation: labelPulse 5s ease-in-out infinite;
+        }
+        @keyframes labelPulse {
+            0%, 100% { opacity: 0.3; letter-spacing: 0.7em; }
+            50% { opacity: 0.6; letter-spacing: 0.75em; }
+        }
+
+        .countdown-container {
+            display: flex;
+            justify-content: center; align-items: center;
+            gap: 10px; flex-wrap: wrap;
+        }
+
+        .countdown-block {
+            display: flex; flex-direction: column;
+            align-items: center; position: relative;
+        }
+
+        .countdown-value {
+            font-family: 'Cinzel', serif;
+            font-size: clamp(2.5rem, 7vw, 5.5rem);
+            font-weight: 700;
+            font-variant-numeric: tabular-nums;
+            color: #fff;
+            text-shadow:
+                0 0 10px rgba(255,255,255,0.6),
+                0 0 30px rgba(76, 175, 80, 0.5),
+                0 0 60px rgba(76, 175, 80, 0.3),
+                0 0 100px rgba(76, 175, 80, 0.15);
+            line-height: 1;
+            padding: 14px 22px;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            backdrop-filter: blur(12px) saturate(1.3);
+            min-width: clamp(70px, 10vw, 130px);
+            text-align: center;
+            transition: all 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+            position: relative;
+            overflow: hidden;
+            box-shadow: inset 0 0 30px rgba(76, 175, 80, 0.05), 0 0 30px rgba(0,0,0,0.3);
+        }
+        .countdown-value::before {
+            content: '';
+            position: absolute; top: 0; left: -100%;
+            width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+            animation: valueShine 5s ease-in-out infinite;
+        }
+        @keyframes valueShine {
+            0%, 75% { left: -100%; }
+            100% { left: 100%; }
+        }
+        .countdown-value::after {
+            content: '';
+            position: absolute; bottom: 0; left: 0;
+            width: 100%; height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(165,214,167,0.5), transparent);
+            animation: bottomGlow 3s ease-in-out infinite alternate;
+        }
+        @keyframes bottomGlow {
+            0% { opacity: 0.3; }
+            100% { opacity: 1; }
+        }
+        .countdown-value:hover {
+            border-color: rgba(165, 214, 167, 0.4);
+            transform: scale(1.1) translateY(-3px);
+            box-shadow: 0 0 40px rgba(76, 175, 80, 0.4), inset 0 0 30px rgba(76, 175, 80, 0.08);
+        }
+
+        .countdown-label-small {
+            font-size: clamp(0.4rem, 0.9vw, 0.6rem);
+            letter-spacing: 0.4em;
+            color: rgba(255,255,255,0.25);
+            margin-top: 12px;
+            text-transform: uppercase;
+        }
+
+        .countdown-separator {
+            font-size: clamp(2rem, 5vw, 4rem);
+            font-weight: 100;
+            color: rgba(255,255,255,0.15);
+            align-self: flex-start;
+            padding-top: 14px;
+            animation: separatorPulse 3s ease-in-out infinite;
+            text-shadow: 0 0 15px rgba(255,255,255,0.1);
+        }
+        @keyframes separatorPulse {
+            0%, 100% { opacity: 0.1; }
+            50% { opacity: 0.8; text-shadow: 0 0 25px rgba(255,255,255,0.5), 0 0 50px rgba(76,175,80,0.4); }
+        }
+
+        /* ===== TARGET DATE ===== */
+        .target-date {
+            margin-top: 60px;
+            text-align: center;
+            animation: fadeIn 2.5s ease-out 3.8s both;
+        }
+        .target-date-text {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(0.8rem, 1.6vw, 1.1rem);
+            letter-spacing: 0.3em;
+            color: rgba(255,255,255,0.4);
+            text-shadow: 0 0 20px rgba(255,255,255,0.1);
+        }
+        .target-date-highlight {
+            color: #a5d6a7;
+            font-weight: 700;
+            text-shadow: 0 0 25px rgba(165, 214, 167, 0.5);
+        }
+
+        /* ===== FOOTER ===== */
+        .footer {
+            position: fixed; bottom: 30px; left: 50%;
+            transform: translateX(-50%); z-index: 10;
+            text-align: center;
+            animation: fadeIn 2.5s ease-out 4.5s both;
+        }
+        .footer-text {
+            font-size: 0.55rem;
+            letter-spacing: 0.5em;
+            color: rgba(255,255,255,0.15);
+        }
+
+        /* ===== ANIMATIONS ===== */
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(40px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .flip-enter { animation: flipIn 0.6s cubic-bezier(0.22, 1, 0.36, 1); }
+        @keyframes flipIn {
+            0% { transform: rotateX(-90deg) scale(0.85); opacity: 0; filter: blur(6px); }
+            100% { transform: rotateX(0deg) scale(1); opacity: 1; filter: blur(0); }
+        }
+
+        /* ===== ZERO STATE ===== */
+        .zero-state {
+            display: none; text-align: center;
+            animation: zeroReveal 2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+        .zero-state.active { display: block; }
+        @keyframes zeroReveal {
+            0% { opacity: 0; transform: scale(0.85); filter: blur(30px) brightness(2); }
+            100% { opacity: 1; transform: scale(1); filter: blur(0) brightness(1); }
+        }
+        .zero-text {
+            font-family: 'Cinzel Decorative', 'Cinzel', serif;
+            font-size: clamp(2.2rem, 5.5vw, 4rem);
+            font-weight: 900;
+            letter-spacing: 0.3em;
+            color: #fff;
+            text-shadow: 0 0 40px rgba(165, 214, 167, 0.7), 0 0 80px rgba(76, 175, 80, 0.5), 0 0 150px rgba(76, 175, 80, 0.25);
+            margin-bottom: 18px;
+            background: linear-gradient(180deg, #fff 0%, #c8e6c9 50%, #a5d6a7 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .zero-sub {
+            font-family: 'Playfair Display', serif;
+            font-style: italic;
+            font-size: clamp(1.1rem, 2.8vw, 1.6rem);
+            color: rgba(255,255,255,0.6);
+            letter-spacing: 0.25em;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 600px) {
+            .countdown-container { gap: 5px; }
+            .countdown-value { padding: 10px 12px; min-width: 60px; }
+            .countdown-separator { padding-top: 6px; }
+            .logo-title-main { letter-spacing: 0.2em; }
+        }
+    </style>
+<base target="_blank">
+</head>
+<body>
+
+    <div class="bg-container">
+        <img src="sh.png" alt="Silent Heaven Background" id="bg-img">
+    </div>
+
+    <div class="fog-layer"></div>
+    <div class="fog-layer"></div>
+    <div class="fog-layer"></div>
+
+    <div class="overlay"></div>
+    <div class="vignette"></div>
+    <div class="ambient-glow"></div>
+    <div class="scanlines"></div>
+    <div class="chromatic"></div>
+
+    <div class="orb-container" id="orb-container"></div>
+    <div class="dust-container" id="dust-container"></div>
+    <div class="fireflies-container" id="fireflies-container"></div>
+    <canvas id="particles-canvas"></canvas>
+
+    <div class="main-content">
+        <div class="logo-section">
+            <div class="logo-title-main">SILENT HEAVEN</div>
+            <div class="logo-divider"></div>
+            <div class="logo-subtitle">A Place People Forgot</div>
+        </div>
+
+        <div class="countdown-section" id="countdown-section">
+            <div class="countdown-label">The Silence Will Break In</div>
+            <div class="countdown-container">
+                <div class="countdown-block">
+                    <div class="countdown-value" id="days">00</div>
+                    <div class="countdown-label-small">Days</div>
+                </div>
+                <div class="countdown-separator">:</div>
+                <div class="countdown-block">
+                    <div class="countdown-value" id="hours">00</div>
+                    <div class="countdown-label-small">Hours</div>
+                </div>
+                <div class="countdown-separator">:</div>
+                <div class="countdown-block">
+                    <div class="countdown-value" id="minutes">00</div>
+                    <div class="countdown-label-small">Minutes</div>
+                </div>
+                <div class="countdown-separator">:</div>
+                <div class="countdown-block">
+                    <div class="countdown-value" id="seconds">00</div>
+                    <div class="countdown-label-small">Seconds</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="zero-state" id="zero-state">
+            <div class="zero-text">THE HEAVEN HAS ARRIVED</div>
+            <div class="zero-sub">A Place People Remembered</div>
+        </div>
+
+        <div class="target-date">
+            <div class="target-date-text">
+                Target: <span class="target-date-highlight">July 23, 2026 — 00:00 UTC</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <div class="footer-text">SILENT HEAVEN — A PLACE PEOPLE FORGOT</div>
+    </div>
+
+    <script>
+        const targetDate = new Date('2026-07-23T00:00:00').getTime();
+
+        // ===== LIGHT ORBS =====
+        function createOrbs() {
+            const container = document.getElementById('orb-container');
+            for (let i = 0; i < 8; i++) {
+                const orb = document.createElement('div');
+                orb.className = 'orb';
+                orb.style.left = (10 + Math.random() * 80) + '%';
+                orb.style.top = (40 + Math.random() * 55) + '%';
+                const s = 80 + Math.random() * 150;
+                orb.style.width = s + 'px'; orb.style.height = s + 'px';
+                orb.style.setProperty('--ox', ((Math.random() - 0.5) * 300) + 'px');
+                orb.style.setProperty('--oy', (-100 - Math.random() * 200) + 'px');
+                orb.style.animationDuration = `${15 + Math.random() * 25}s, ${4 + Math.random() * 6}s`;
+                orb.style.animationDelay = `${Math.random() * 20}s, ${Math.random() * 5}s`;
+                const cv = Math.random();
+                if (cv > 0.6) orb.style.background = 'radial-gradient(circle, rgba(165,245,165,0.3) 0%, transparent 70%)';
+                else if (cv > 0.3) orb.style.background = 'radial-gradient(circle, rgba(200,230,201,0.25) 0%, transparent 70%)';
+                else orb.style.background = 'radial-gradient(circle, rgba(255,249,196,0.2) 0%, transparent 70%)';
+                container.appendChild(orb);
+            }
+        }
+        createOrbs();
+
+        // ===== FIREFLIES =====
+        function createFireflies() {
+            const container = document.getElementById('fireflies-container');
+            for (let i = 0; i < 40; i++) {
+                const f = document.createElement('div');
+                f.className = 'firefly';
+                f.style.left = Math.random() * 100 + '%';
+                f.style.top = (50 + Math.random() * 50) + '%';
+                f.style.setProperty('--tx', ((Math.random() - 0.5) * 300) + 'px');
+                f.style.setProperty('--ty', (-80 - Math.random() * 220) + 'px');
+                f.style.animationDuration = `${6 + Math.random() * 16}s, ${1.2 + Math.random() * 3}s`;
+                f.style.animationDelay = `${Math.random() * 20}s, ${Math.random() * 6}s`;
+                const s = 2 + Math.random() * 6;
+                f.style.width = s + 'px'; f.style.height = s + 'px';
+                const cv = Math.random();
+                if (cv > 0.65) { f.style.background = '#fff9c4'; f.style.boxShadow = `0 0 10px 4px rgba(255,249,196,0.8), 0 0 20px 8px rgba(255,249,196,0.4)`; }
+                else if (cv > 0.3) { f.style.background = '#c8e6c9'; f.style.boxShadow = `0 0 10px 4px rgba(200,230,201,0.8), 0 0 20px 8px rgba(200,230,201,0.4)`; }
+                else { f.style.background = '#a5f5a5'; f.style.boxShadow = `0 0 10px 4px rgba(165,245,165,0.9), 0 0 20px 8px rgba(165,245,165,0.5)`; }
+                container.appendChild(f);
+            }
+        }
+        createFireflies();
+
+        // ===== DUST =====
+        function createDust() {
+            const container = document.getElementById('dust-container');
+            for (let i = 0; i < 70; i++) {
+                const d = document.createElement('div');
+                d.className = 'dust-mote';
+                d.style.left = Math.random() * 100 + '%';
+                d.style.top = Math.random() * 100 + '%';
+                d.style.setProperty('--dx', ((Math.random() - 0.5) * 150) + 'px');
+                d.style.setProperty('--dy', (-50 - Math.random() * 120) + 'px');
+                d.style.animationDuration = (8 + Math.random() * 30) + 's';
+                d.style.animationDelay = (Math.random() * 30) + 's';
+                const sz = 1 + Math.random() * 3;
+                d.style.width = sz + 'px'; d.style.height = sz + 'px';
+                d.style.background = `rgba(255,255,255,${0.1 + Math.random() * 0.4})`;
+                container.appendChild(d);
+            }
+        }
+        createDust();
+
+        // ===== CANVAS PARTICLES =====
+        const canvas = document.getElementById('particles-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+        resizeCanvas(); window.addEventListener('resize', resizeCanvas);
+
+        class Particle {
+            constructor() { this.reset(); }
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 2 + 0.2;
+                this.speedX = (Math.random() - 0.5) * 0.15;
+                this.speedY = (Math.random() - 0.5) * 0.15 - 0.05;
+                this.opacity = Math.random() * 0.3 + 0.03;
+                this.life = Math.random() * 300 + 300;
+                this.maxLife = this.life;
+                this.color = Math.random() > 0.5 ? '200, 230, 201' : '255, 255, 255';
+            }
+            update() {
+                this.x += this.speedX; this.y += this.speedY; this.life--;
+                if (this.life <= 0 || this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height) this.reset();
+            }
+            draw() {
+                const alpha = this.opacity * (this.life / this.maxLife);
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(${this.color}, ${alpha})`;
+                ctx.fill();
+            }
+        }
+        for (let i = 0; i < 100; i++) particles.push(new Particle());
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => { p.update(); p.draw(); });
+            requestAnimationFrame(animateParticles);
+        }
+        animateParticles();
+
+        // ===== COUNTDOWN =====
+        const daysEl = document.getElementById('days');
+        const hoursEl = document.getElementById('hours');
+        const minutesEl = document.getElementById('minutes');
+        const secondsEl = document.getElementById('seconds');
+        const targetDisplay = document.getElementById('target-display');
+        const countdownSection = document.getElementById('countdown-section');
+        const zeroState = document.getElementById('zero-state');
+        let prevValues = { days: -1, hours: -1, minutes: -1, seconds: -1 };
+
+        function updateCountdown() {
+            const now = new Date().getTime();
+            const distance = targetDate - now;
+            if (distance <= 0) {
+                countdownSection.style.display = 'none';
+                zeroState.classList.add('active');
+                daysEl.textContent = '00'; hoursEl.textContent = '00';
+                minutesEl.textContent = '00'; secondsEl.textContent = '00';
+                return;
+            }
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            if (days !== prevValues.days) { daysEl.textContent = String(days).padStart(2, '0'); daysEl.classList.add('flip-enter'); setTimeout(() => daysEl.classList.remove('flip-enter'), 600); prevValues.days = days; }
+            if (hours !== prevValues.hours) { hoursEl.textContent = String(hours).padStart(2, '0'); hoursEl.classList.add('flip-enter'); setTimeout(() => hoursEl.classList.remove('flip-enter'), 600); prevValues.hours = hours; }
+            if (minutes !== prevValues.minutes) { minutesEl.textContent = String(minutes).padStart(2, '0'); minutesEl.classList.add('flip-enter'); setTimeout(() => minutesEl.classList.remove('flip-enter'), 600); prevValues.minutes = minutes; }
+            if (seconds !== prevValues.seconds) { secondsEl.textContent = String(seconds).padStart(2, '0'); secondsEl.classList.add('flip-enter'); setTimeout(() => secondsEl.classList.remove('flip-enter'), 600); prevValues.seconds = seconds; }
+
+            const targetDateObj = new Date(targetDate);
+            const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', timeZoneName: 'short' };
+            targetDisplay.textContent = targetDateObj.toLocaleDateString('en-US', options);
+        }
+        setInterval(updateCountdown, 1000);
+        updateCountdown();
+
+        // ===== PARALLAX =====
+        const bgImg = document.getElementById('bg-img');
+        document.addEventListener('mousemove', (e) => {
+            const x = (e.clientX / window.innerWidth - 0.5) * 10;
+            const y = (e.clientY / window.innerHeight - 0.5) * 10;
+            bgImg.style.transform = `scale(1.15) translate(${x}px, ${y}px)`;
+        });
+    </script>
+</body>
+</html>
