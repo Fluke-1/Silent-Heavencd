@@ -268,13 +268,24 @@
             z-index: -1;
             color: #fff;
             -webkit-text-fill-color: #fff; /* Override ตัวใส */
-            filter: blur(12px) brightness(1.8); /* คำนวณครั้งเดียว ไม่ต้องคำนวณทุกเฟรม */
-            animation: blurFadeOut 2.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+            animation: blurFadeOut 5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
             pointer-events: none;
         }
         @keyframes blurFadeOut {
-            0% { opacity: 1; }
-            100% { opacity: 0; }
+            0% { 
+                opacity: 1; 
+                filter: blur(25px) brightness(2.5); 
+                transform: scale(1.1); /* เริ่มต้นใหญ่กว่าเดิมนิดหน่อย */
+            }
+            60% {
+                opacity: 0.6;
+                filter: blur(10px) brightness(1.5);
+            }
+            100% { 
+                opacity: 0; 
+                filter: blur(0px) brightness(1); 
+                transform: scale(1.3); /* ขยายตัวออกจนจางหายไป */
+            }
         }
 
         .logo-divider {
