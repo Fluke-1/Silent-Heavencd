@@ -1,13 +1,14 @@
+
 <!DOCTYPE html>
 <html lang="th">
 <head>
     <link rel="icon" type="image/png" href="logo.png">
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>SILENT HEAVEN — A Place People Forgot</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Noto+Sans+Thai:wght@300;400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -17,25 +18,29 @@
             font-family: 'Cinzel', serif;
             color: #fff;
             cursor: default;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
 
         /* ===== BACKGROUND ===== */
         .bg-container {
             position: fixed; top: 0; left: 0;
             width: 100vw; height: 100vh; z-index: 0;
+            will-change: transform;
         }
         .bg-container img {
             width: 100%; height: 100%; object-fit: cover;
             filter: brightness(0.3) contrast(1.3) saturate(1.4);
             animation: bgBreath 10s ease-in-out infinite alternate;
             transform: scale(1.15);
+            will-change: transform, filter;
         }
         @keyframes bgBreath {
             0% { filter: brightness(0.3) contrast(1.3) saturate(1.4); transform: scale(1.15); }
             100% { filter: brightness(0.55) contrast(1.2) saturate(1.5); transform: scale(1.18); }
         }
 
-        /* ===== FOG LAYERS ===== */
+        /* ===== FOG LAYERS (ลดเหลือ 2 ชั้น) ===== */
         .fog-layer {
             position: fixed; top: 0; left: 0;
             width: 300%; height: 100%; z-index: 1;
@@ -44,23 +49,19 @@
             background-size: 1200px 600px;
             opacity: 0.5;
             animation: fogDrift 50s linear infinite;
+            will-change: transform;
         }
         .fog-layer:nth-child(2) {
             animation: fogDrift 70s linear infinite reverse;
             opacity: 0.35;
             top: 25%;
         }
-        .fog-layer:nth-child(3) {
-            animation: fogDrift 35s linear infinite;
-            opacity: 0.2;
-            top: 60%;
-        }
         @keyframes fogDrift {
             0% { transform: translateX(0); }
             100% { transform: translateX(-33.33%); }
         }
 
-        /* ===== OVERLAY ===== */
+        /* ===== OVERLAY (รวมหลายชั้นเป็นอันเดียว) ===== */
         .overlay {
             position: fixed; top: 0; left: 0;
             width: 100%; height: 100%; z-index: 2;
@@ -69,43 +70,60 @@
                 radial-gradient(ellipse at 50% 15%, rgba(76, 175, 80, 0.12) 0%, transparent 55%),
                 radial-gradient(ellipse at 85% 80%, rgba(0, 0, 0, 0.95) 0%, transparent 50%),
                 radial-gradient(ellipse at 15% 80%, rgba(0, 0, 0, 0.9) 0%, transparent 50%),
-                linear-gradient(to bottom, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.02) 30%, rgba(0,0,0,0.8) 100%);
-        }
-
-        .vignette {
-            position: fixed; top: 0; left: 0;
-            width: 100%; height: 100%; z-index: 2;
-            pointer-events: none;
-            box-shadow: inset 0 0 250px rgba(0,0,0,0.98), inset 0 0 500px rgba(0,0,0,0.7);
-        }
-
-        /* ===== AMBIENT GLOW ===== */
-        .ambient-glow {
-            position: fixed; top: 0; left: 0;
-            width: 100%; height: 100%; z-index: 2;
-            pointer-events: none;
-            background:
+                linear-gradient(to bottom, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.02) 30%, rgba(0,0,0,0.8) 100%),
                 radial-gradient(ellipse at 25% 78%, rgba(76, 175, 80, 0.12) 0%, transparent 50%),
                 radial-gradient(ellipse at 75% 68%, rgba(129, 199, 132, 0.08) 0%, transparent 45%),
                 radial-gradient(ellipse at 50% 92%, rgba(165, 214, 167, 0.07) 0%, transparent 60%);
             animation: ambientShift 25s ease-in-out infinite alternate;
+            box-shadow: inset 0 0 250px rgba(0,0,0,0.98), inset 0 0 500px rgba(0,0,0,0.7);
         }
         @keyframes ambientShift {
             0% { opacity: 0.7; }
             100% { opacity: 1.3; }
         }
 
-        /* ===== LIGHT ORBS (glowing spheres) ===== */
+        /* ===== SCANLINES (ลด opacity) ===== */
+        .scanlines {
+            position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%; z-index: 5;
+            pointer-events: none;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                rgba(0,0,0,0.03) 2px,
+                rgba(0,0,0,0.03) 4px
+            );
+            opacity: 0.25;
+        }
+
+        /* ===== CHROMATIC ===== */
+        .chromatic {
+            position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%; z-index: 6;
+            pointer-events: none;
+            background: radial-gradient(ellipse at 50% 50%, transparent 40%, rgba(76,175,80,0.02) 100%);
+            mix-blend-mode: screen;
+            animation: chromaticShift 8s ease-in-out infinite;
+        }
+        @keyframes chromaticShift {
+            0%, 100% { filter: hue-rotate(0deg); }
+            50% { filter: hue-rotate(5deg); }
+        }
+
+        /* ===== LIGHT ORBS ===== */
         .orb-container {
             position: fixed; top: 0; left: 0;
             width: 100%; height: 100%; z-index: 3;
             pointer-events: none; overflow: hidden;
+            contain: layout style;
         }
         .orb {
             position: absolute;
             border-radius: 50%;
             filter: blur(40px);
             animation: orbFloat linear infinite, orbPulse ease-in-out infinite;
+            will-change: transform, opacity;
         }
         @keyframes orbFloat {
             0% { transform: translate(0, 0) scale(0.8); opacity: 0; }
@@ -123,12 +141,14 @@
             position: fixed; top: 0; left: 0;
             width: 100%; height: 100%; z-index: 4;
             pointer-events: none; overflow: hidden;
+            contain: layout style;
         }
         .firefly {
             position: absolute;
             border-radius: 50%;
             opacity: 0;
             animation: fireflyFloat linear infinite, fireflyGlow ease-in-out infinite;
+            will-change: transform, opacity;
         }
         @keyframes fireflyFloat {
             0% { transform: translate(0, 0) scale(0.2); opacity: 0; }
@@ -146,11 +166,13 @@
             position: fixed; top: 0; left: 0;
             width: 100%; height: 100%; z-index: 3;
             pointer-events: none; overflow: hidden;
+            contain: layout style;
         }
         .dust-mote {
             position: absolute;
             border-radius: 50%;
             animation: dustFloat linear infinite;
+            will-change: transform, opacity;
         }
         @keyframes dustFloat {
             0% { transform: translate(0, 0) rotate(0deg); opacity: 0; }
@@ -164,35 +186,6 @@
             position: fixed; top: 0; left: 0;
             width: 100%; height: 100%; z-index: 3;
             pointer-events: none;
-        }
-
-        /* ===== SCANLINES ===== */
-        .scanlines {
-            position: fixed; top: 0; left: 0;
-            width: 100%; height: 100%; z-index: 5;
-            pointer-events: none;
-            background: repeating-linear-gradient(
-                0deg,
-                transparent,
-                transparent 2px,
-                rgba(0,0,0,0.04) 2px,
-                rgba(0,0,0,0.04) 4px
-            );
-            opacity: 0.35;
-        }
-
-        /* ===== CHROMATIC ABERRATION (subtle RGB split) ===== */
-        .chromatic {
-            position: fixed; top: 0; left: 0;
-            width: 100%; height: 100%; z-index: 6;
-            pointer-events: none;
-            background: radial-gradient(ellipse at 50% 50%, transparent 40%, rgba(76,175,80,0.02) 100%);
-            mix-blend-mode: screen;
-            animation: chromaticShift 8s ease-in-out infinite;
-        }
-        @keyframes chromaticShift {
-            0%, 100% { filter: hue-rotate(0deg); }
-            50% { filter: hue-rotate(5deg); }
         }
 
         /* ===== MAIN CONTENT ===== */
@@ -314,6 +307,7 @@
             border: 1px solid rgba(255,255,255,0.1);
             border-radius: 12px;
             backdrop-filter: blur(12px) saturate(1.3);
+            -webkit-backdrop-filter: blur(12px) saturate(1.3);
             min-width: clamp(70px, 10vw, 130px);
             text-align: center;
             transition: all 0.5s cubic-bezier(0.22, 1, 0.36, 1);
@@ -453,6 +447,25 @@
             .countdown-separator { padding-top: 6px; }
             .logo-title-main { letter-spacing: 0.2em; }
         }
+
+        /* ===== MOBILE PERFORMANCE (ลด effects) ===== */
+        @media (max-width: 768px), (pointer: coarse) {
+            .orb-container { display: none; }
+            .scanlines { opacity: 0.15; }
+            .chromatic { animation: none; }
+            .countdown-value { backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+            .bg-container img { animation-duration: 15s; }
+            .fog-layer { opacity: 0.3; }
+        }
+
+        /* ===== LOW-POWER MODE (prefers-reduced-motion) ===== */
+        @media (prefers-reduced-motion: reduce) {
+            .fog-layer, .orb-container, .fireflies-container, .dust-container, #particles-canvas { display: none !important; }
+            .bg-container img { animation: none; }
+            .overlay { animation: none; }
+            .scanlines { display: none; }
+            .chromatic { display: none; }
+        }
     </style>
 <base target="_blank">
 </head>
@@ -464,11 +477,8 @@
 
     <div class="fog-layer"></div>
     <div class="fog-layer"></div>
-    <div class="fog-layer"></div>
 
     <div class="overlay"></div>
-    <div class="vignette"></div>
-    <div class="ambient-glow"></div>
     <div class="scanlines"></div>
     <div class="chromatic"></div>
 
@@ -526,12 +536,30 @@
     </div>
 
     <script>
+        // ===== DEVICE DETECTION =====
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.matchMedia('(pointer: coarse)').matches;
+        const isLowPower = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        const isTouchDevice = window.matchMedia('(pointer: coarse)').matches;
+
+        // ===== CONFIG (ลดจำนวนตามอุปกรณ์) =====
+        const CONFIG = {
+            orbs: isMobile ? 0 : (isTouchDevice ? 3 : 8),
+            fireflies: isMobile ? 12 : (isTouchDevice ? 20 : 40),
+            dust: isMobile ? 20 : (isTouchDevice ? 35 : 70),
+            particles: isMobile ? 25 : (isTouchDevice ? 50 : 100),
+            canvasFPS: isMobile ? 15 : 30,
+            enableParallax: !isMobile,
+            enableOrbs: !isMobile,
+            enableCanvas: true
+        };
+
         const targetDate = new Date('2026-08-16T19:00:00').getTime();
 
         // ===== LIGHT ORBS =====
         function createOrbs() {
+            if (!CONFIG.enableOrbs) return;
             const container = document.getElementById('orb-container');
-            for (let i = 0; i < 8; i++) {
+            for (let i = 0; i < CONFIG.orbs; i++) {
                 const orb = document.createElement('div');
                 orb.className = 'orb';
                 orb.style.left = (10 + Math.random() * 80) + '%';
@@ -554,7 +582,7 @@
         // ===== FIREFLIES =====
         function createFireflies() {
             const container = document.getElementById('fireflies-container');
-            for (let i = 0; i < 40; i++) {
+            for (let i = 0; i < CONFIG.fireflies; i++) {
                 const f = document.createElement('div');
                 f.className = 'firefly';
                 f.style.left = Math.random() * 100 + '%';
@@ -577,7 +605,7 @@
         // ===== DUST =====
         function createDust() {
             const container = document.getElementById('dust-container');
-            for (let i = 0; i < 70; i++) {
+            for (let i = 0; i < CONFIG.dust; i++) {
                 const d = document.createElement('div');
                 d.className = 'dust-mote';
                 d.style.left = Math.random() * 100 + '%';
@@ -594,18 +622,27 @@
         }
         createDust();
 
-        // ===== CANVAS PARTICLES =====
+        // ===== CANVAS PARTICLES (จำกัด FPS) =====
         const canvas = document.getElementById('particles-canvas');
-        const ctx = canvas.getContext('2d');
+        const ctx = canvas.getContext('2d', { alpha: true });
         let particles = [];
-        function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
-        resizeCanvas(); window.addEventListener('resize', resizeCanvas);
+        let lastFrameTime = 0;
+        const frameInterval = 1000 / CONFIG.canvasFPS;
+
+        function resizeCanvas() {
+            const dpr = isMobile ? 1 : Math.min(window.devicePixelRatio || 1, 2);
+            canvas.width = window.innerWidth * dpr;
+            canvas.height = window.innerHeight * dpr;
+            ctx.scale(dpr, dpr);
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
 
         class Particle {
             constructor() { this.reset(); }
             reset() {
-                this.x = Math.random() * canvas.width;
-                this.y = Math.random() * canvas.height;
+                this.x = Math.random() * window.innerWidth;
+                this.y = Math.random() * window.innerHeight;
                 this.size = Math.random() * 2 + 0.2;
                 this.speedX = (Math.random() - 0.5) * 0.15;
                 this.speedY = (Math.random() - 0.5) * 0.15 - 0.05;
@@ -616,7 +653,7 @@
             }
             update() {
                 this.x += this.speedX; this.y += this.speedY; this.life--;
-                if (this.life <= 0 || this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height) this.reset();
+                if (this.life <= 0 || this.x < 0 || this.x > window.innerWidth || this.y < 0 || this.y > window.innerHeight) this.reset();
             }
             draw() {
                 const alpha = this.opacity * (this.life / this.maxLife);
@@ -626,20 +663,26 @@
                 ctx.fill();
             }
         }
-        for (let i = 0; i < 100; i++) particles.push(new Particle());
-        function animateParticles() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            particles.forEach(p => { p.update(); p.draw(); });
+
+        for (let i = 0; i < CONFIG.particles; i++) particles.push(new Particle());
+
+        function animateParticles(timestamp) {
             requestAnimationFrame(animateParticles);
+            if (timestamp - lastFrameTime < frameInterval) return;
+            lastFrameTime = timestamp;
+            ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+            for (let i = 0; i < particles.length; i++) {
+                particles[i].update();
+                particles[i].draw();
+            }
         }
-        animateParticles();
+        animateParticles(0);
 
         // ===== COUNTDOWN =====
         const daysEl = document.getElementById('days');
         const hoursEl = document.getElementById('hours');
         const minutesEl = document.getElementById('minutes');
         const secondsEl = document.getElementById('seconds');
-        const targetDisplay = document.getElementById('target-display');
         const countdownSection = document.getElementById('countdown-section');
         const zeroState = document.getElementById('zero-state');
         let prevValues = { days: -1, hours: -1, minutes: -1, seconds: -1 };
@@ -663,21 +706,19 @@
             if (hours !== prevValues.hours) { hoursEl.textContent = String(hours).padStart(2, '0'); hoursEl.classList.add('flip-enter'); setTimeout(() => hoursEl.classList.remove('flip-enter'), 600); prevValues.hours = hours; }
             if (minutes !== prevValues.minutes) { minutesEl.textContent = String(minutes).padStart(2, '0'); minutesEl.classList.add('flip-enter'); setTimeout(() => minutesEl.classList.remove('flip-enter'), 600); prevValues.minutes = minutes; }
             if (seconds !== prevValues.seconds) { secondsEl.textContent = String(seconds).padStart(2, '0'); secondsEl.classList.add('flip-enter'); setTimeout(() => secondsEl.classList.remove('flip-enter'), 600); prevValues.seconds = seconds; }
-
-            const targetDateObj = new Date(targetDate);
-            const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', timeZoneName: 'short' };
-            targetDisplay.textContent = targetDateObj.toLocaleDateString('en-US', options);
         }
         setInterval(updateCountdown, 1000);
         updateCountdown();
 
-        // ===== PARALLAX =====
+        // ===== PARALLAX (ปิดบนมือถือ) =====
         const bgImg = document.getElementById('bg-img');
-        document.addEventListener('mousemove', (e) => {
-            const x = (e.clientX / window.innerWidth - 0.5) * 10;
-            const y = (e.clientY / window.innerHeight - 0.5) * 10;
-            bgImg.style.transform = `scale(1.15) translate(${x}px, ${y}px)`;
-        });
+        if (CONFIG.enableParallax) {
+            document.addEventListener('mousemove', (e) => {
+                const x = (e.clientX / window.innerWidth - 0.5) * 10;
+                const y = (e.clientY / window.innerHeight - 0.5) * 10;
+                bgImg.style.transform = `scale(1.15) translate(${x}px, ${y}px)`;
+            });
+        }
     </script>
 </body>
 </html>
