@@ -26,22 +26,21 @@
             position: fixed; top: 0; left: 0;
             width: 100vw; height: 100vh; z-index: 0;
             will-change: transform;
-            /* เพิ่ม Containment เพื่อแยก Layout/Paint */
             contain: layout paint style; 
         }
         .bg-container img {
             width: 100%; height: 100%; object-fit: cover;
-            filter: brightness(0.3) contrast(1.3) saturate(1.4);
-            animation: bgBreath 10s ease-in-out infinite alternate;
-            transform: scale(1.15);
-            will-change: transform, filter;
-            /* บังคับส่งไป GPU Layer */
-            backface-visibility: hidden;
+            /* 1. เปลี่ยน filter เป็นค่าคงที่ (Static) เพื่อไม่ให้มีการคำนวณซ้ำทุกเฟรม */
+            filter: brightness(0.35) contrast(1.25) saturate(1.45);
+            animation: bgBreath 15s ease-in-out infinite alternate;
             transform: translateZ(0) scale(1.15);
+            will-change: transform;
+            backface-visibility: hidden;
         }
+        /* 2. ตัด filter ออกจาก Animation ใช้แค่ Transform Scale ซึ่งทำงานบน GPU */
         @keyframes bgBreath {
-            0% { filter: brightness(0.3) contrast(1.3) saturate(1.4); transform: translateZ(0) scale(1.15); }
-            100% { filter: brightness(0.55) contrast(1.2) saturate(1.5); transform: translateZ(0) scale(1.18); }
+            0% { transform: translateZ(0) scale(1.15); }
+            100% { transform: translateZ(0) scale(1.22); }
         }
 
         /* ===== FOG LAYERS ===== */
@@ -85,7 +84,7 @@
         }
         @keyframes ambientShift {
             0% { opacity: 0.7; }
-            100% { opacity: 1.3; }
+            100% { opacity: 1; } /* ปรับจาก 1.3 เป็น 1 เพื่อความถูกต้อง */
         }
 
         /* ===== SCANLINES ===== */
@@ -212,13 +211,14 @@
         .logo-section {
             text-align: center;
             margin-bottom: 70px;
-            animation: revealLogo 3s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+            /* 3. ตัด filter: blur และ brightness ออกจาก Animation โดยสิ้นเชิง */
+            animation: revealLogo 2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
             opacity: 0;
+            will-change: transform, opacity;
         }
         @keyframes revealLogo {
-            0% { opacity: 0; transform: translateY(60px) scale(0.9); filter: blur(15px) brightness(2); }
-            50% { opacity: 0.5; filter: blur(5px) brightness(1.5); }
-            100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0) brightness(1); }
+            0% { opacity: 0; transform: translateY(40px) scale(0.95); }
+            100% { opacity: 1; transform: translateY(0) scale(1); }
         }
 
         .logo-title-main {
@@ -226,13 +226,6 @@
             font-size: clamp(3rem, 9vw, 7rem);
             font-weight: 900;
             letter-spacing: 0.35em;
-            color: #fff;
-            text-shadow:
-                0 0 20px rgba(255,255,255,0.8),
-                0 0 60px rgba(255,255,255,0.4),
-                0 0 120px rgba(76, 175, 80, 0.6),
-                0 0 200px rgba(76, 175, 80, 0.3),
-                0 0 300px rgba(76, 175, 80, 0.1);
             position: relative;
             display: inline-block;
             line-height: 1.1;
@@ -240,11 +233,48 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            animation: titleShimmer 4s ease-in-out infinite alternate;
+            color: #fff; /* Fallback */
         }
-        @keyframes titleShimmer {
-            0% { filter: brightness(1); }
-            100% { filter: brightness(1.3); }
+
+        /* 4. หลอก Layer แสงวงใหญ่ (Glow) แยกออกมาเป็น Pseudo-element เพื่อไม่ให้มากระทบตัวหนังสือ */
+        .logo-title-main::after {
+            content: attr(data-text);
+            position: absolute;
+            left: 0; top: 0;
+            width: 100%;
+            z-index: -2;
+            -webkit-text-fill-color: transparent;
+            color: transparent;
+            text-shadow:
+                0 0 20px rgba(255,255,255,0.8),
+                0 0 60px rgba(255,255,255,0.4),
+                0 0 120px rgba(76, 175, 80, 0.6),
+                0 0 200px rgba(76, 175, 80, 0.3),
+                0 0 300px rgba(76, 175, 80, 0.1);
+            animation: titleGlow 4s ease-in-out infinite alternate;
+            pointer-events: none;
+        }
+        @keyframes titleGlow {
+            0% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+
+        /* 5. หลอก Layer ตัวหนังสือเบลอ (Blur Reveal) ใช้ Static Filter + Opacity แทนการทำ Animation Filter */
+        .logo-title-main::before {
+            content: attr(data-text);
+            position: absolute;
+            left: 0; top: 0;
+            width: 100%;
+            z-index: -1;
+            color: #fff;
+            -webkit-text-fill-color: #fff; /* Override ตัวใส */
+            filter: blur(12px) brightness(1.8); /* คำนวณครั้งเดียว ไม่ต้องคำนวณทุกเฟรม */
+            animation: blurFadeOut 2.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+            pointer-events: none;
+        }
+        @keyframes blurFadeOut {
+            0% { opacity: 1; }
+            100% { opacity: 0; }
         }
 
         .logo-divider {
@@ -416,9 +446,10 @@
             to { opacity: 1; transform: translateY(0); }
         }
         .flip-enter { animation: flipIn 0.6s cubic-bezier(0.22, 1, 0.36, 1); }
+        /* 6. ตัด filter: blur(6px) ออกจากตัวเลข Countdown เพื่อไม่ให้กระตุกทุกๆ วินาที */
         @keyframes flipIn {
-            0% { transform: rotateX(-90deg) scale(0.85); opacity: 0; filter: blur(6px); }
-            100% { transform: rotateX(0deg) scale(1); opacity: 1; filter: blur(0); }
+            0% { transform: rotateX(-90deg) scale(0.85); opacity: 0; }
+            100% { transform: rotateX(0deg) scale(1); opacity: 1; }
         }
 
         /* ===== ZERO STATE ===== */
@@ -458,6 +489,7 @@
             .countdown-value { padding: 10px 12px; min-width: 60px; }
             .countdown-separator { padding-top: 6px; }
             .logo-title-main { letter-spacing: 0.2em; }
+            .logo-title-main::before, .logo-title-main::after { letter-spacing: 0.2em; }
         }
 
         /* ===== MOBILE PERFORMANCE ===== */
@@ -465,7 +497,12 @@
             .orb-container { display: none; }
             .scanlines { opacity: 0.15; }
             .chromatic { animation: none; }
-            .countdown-value { backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+            /* 7. ปิด backdrop-filter บนมือถือ เพราะมันทำให้เฟรมตกตอนเลื่อนพื้นหลัง */
+            .countdown-value { 
+                backdrop-filter: none; 
+                -webkit-backdrop-filter: none; 
+                background: rgba(0, 0, 0, 0.55); 
+            }
             .bg-container img { animation-duration: 15s; }
             .fog-layer { opacity: 0.3; }
         }
@@ -500,7 +537,8 @@
 
     <div class="main-content">
         <div class="logo-section">
-            <div class="logo-title-main">SILENT HEAVEN</div>
+            <!-- เพิ่ม attribue data-text เพื่อให้ CSS หลอก Layer แสง/เบลอ ดึงตัวหนังสือไปแสดงผลได้ -->
+            <div class="logo-title-main" data-text="SILENT HEAVEN">SILENT HEAVEN</div>
             <div class="logo-divider"></div>
             <div class="logo-subtitle">A Place People Forgot</div>
         </div>
@@ -565,7 +603,7 @@
 
         const targetDate = new Date('2026-08-16T19:00:00').getTime();
 
-        // ===== DOM CREATION FUNCTIONS (รองรับ DocumentFragment เพื่อลด Reflow) =====
+        // ===== DOM CREATION (Fragment) =====
         function createOrbs() {
             if (!CONFIG.enableOrbs) return;
             const container = document.getElementById('orb-container');
@@ -587,7 +625,7 @@
                 else orb.style.background = 'radial-gradient(circle, rgba(255,249,196,0.2) 0%, transparent 70%)';
                 frag.appendChild(orb);
             }
-            container.appendChild(frag); // Append ทีเดียว
+            container.appendChild(frag);
         }
 
         function createFireflies() {
@@ -633,13 +671,13 @@
             container.appendChild(frag);
         }
 
-        // ===== CANVAS PARTICLES (Optimized) =====
+        // ===== CANVAS PARTICLES =====
         const canvas = document.getElementById('particles-canvas');
         const ctx = canvas.getContext('2d', { alpha: true });
         let particles = [];
         let lastFrameTime = 0;
         const frameInterval = 1000 / CONFIG.canvasFPS;
-        let W = window.innerWidth, H = window.innerHeight; // เก็บค่าไว้แทนการเรียกตลอดเวลา
+        let W = window.innerWidth, H = window.innerHeight;
         let rafId = null;
         let isAnimating = false;
 
@@ -649,7 +687,7 @@
             const dpr = isMobile ? 1 : Math.min(window.devicePixelRatio || 1, 2);
             canvas.width = W * dpr;
             canvas.height = H * dpr;
-            ctx.setTransform(dpr, 0, 0, dpr, 0, 0); // ป้องกันบั๊ค scale ทบกัน
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
         }
         resizeCanvas();
         window.addEventListener('resize', () => {
@@ -725,7 +763,7 @@
             if (seconds !== prevValues.seconds) { secondsEl.textContent = String(seconds).padStart(2, '0'); secondsEl.classList.add('flip-enter'); setTimeout(() => secondsEl.classList.remove('flip-enter'), 600); prevValues.seconds = seconds; }
         }
 
-        // ===== PARALLAX (Throttled ด้วย rAF) =====
+        // ===== PARALLAX =====
         const bgImg = document.getElementById('bg-img');
         if (CONFIG.enableParallax) {
             let ticking = false;
@@ -742,25 +780,19 @@
             });
         }
 
-        // ===== DEFERRED INITIALIZATION (สาเหตุหลักที่แก้ FPS ตก) =====
+        // ===== DEFERRED INITIALIZATION =====
         function initHeavyEffects() {
-            // สร้าง Particle Array ในคราวเดียว
             for (let i = 0; i < CONFIG.particles; i++) particles.push(new Particle());
-            
             createOrbs();
             createFireflies();
             createDust();
-            
-            // เริ่ม Canvas Loop
             isAnimating = true;
             rafId = requestAnimationFrame(animateParticles);
         }
 
-        // เริ่ม Countdown ก่อนเบาๆ ก่อน
         setInterval(updateCountdown, 1000);
         updateCountdown();
 
-        // เริ่มต้น Effects หนักๆ หลังจาก First Paint เสร็จสิ้น
         if (document.readyState === 'complete') {
             requestAnimationFrame(() => requestAnimationFrame(initHeavyEffects));
         } else {
@@ -769,7 +801,7 @@
             });
         }
 
-        // ===== VISIBILITY API (ประหยัดแบตเตอรี่/CPU) =====
+        // ===== VISIBILITY API =====
         document.addEventListener('visibilitychange', () => {
             if (document.hidden) {
                 isAnimating = false;
@@ -777,7 +809,7 @@
             } else {
                 if (!isAnimating) {
                     isAnimating = true;
-                    lastFrameTime = 0; // reset time
+                    lastFrameTime = 0;
                     rafId = requestAnimationFrame(animateParticles);
                 }
             }
