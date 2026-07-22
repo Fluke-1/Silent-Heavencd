@@ -30,14 +30,12 @@
         }
         .bg-container img {
             width: 100%; height: 100%; object-fit: cover;
-            /* 1. เปลี่ยน filter เป็นค่าคงที่ (Static) เพื่อไม่ให้มีการคำนวณซ้ำทุกเฟรม */
             filter: brightness(0.35) contrast(1.25) saturate(1.45);
             animation: bgBreath 15s ease-in-out infinite alternate;
             transform: translateZ(0) scale(1.15);
             will-change: transform;
             backface-visibility: hidden;
         }
-        /* 2. ตัด filter ออกจาก Animation ใช้แค่ Transform Scale ซึ่งทำงานบน GPU */
         @keyframes bgBreath {
             0% { transform: translateZ(0) scale(1.15); }
             100% { transform: translateZ(0) scale(1.22); }
@@ -84,7 +82,7 @@
         }
         @keyframes ambientShift {
             0% { opacity: 0.7; }
-            100% { opacity: 1; } /* ปรับจาก 1.3 เป็น 1 เพื่อความถูกต้อง */
+            100% { opacity: 1; }
         }
 
         /* ===== SCANLINES ===== */
@@ -211,7 +209,6 @@
         .logo-section {
             text-align: center;
             margin-bottom: 70px;
-            /* 3. ตัด filter: blur และ brightness ออกจาก Animation โดยสิ้นเชิง */
             animation: revealLogo 10s cubic-bezier(0.22, 1, 0.36, 1) forwards;
             opacity: 0;
             will-change: transform, opacity;
@@ -233,10 +230,9 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            color: #fff; /* Fallback */
+            color: #fff;
         }
 
-        /* 4. หลอก Layer แสงวงใหญ่ (Glow) แยกออกมาเป็น Pseudo-element เพื่อไม่ให้มากระทบตัวหนังสือ */
         .logo-title-main::after {
             content: attr(data-text);
             position: absolute;
@@ -259,7 +255,6 @@
             100% { opacity: 1; }
         }
 
-        /* 5. หลอก Layer ตัวหนังสือเบลอ (Blur Reveal) ใช้ Static Filter + Opacity แทนการทำ Animation Filter */
         .logo-title-main::before {
             content: attr(data-text);
             position: absolute;
@@ -267,7 +262,7 @@
             width: 100%;
             z-index: -1;
             color: #fff;
-            -webkit-text-fill-color: #fff; /* Override ตัวใส */
+            -webkit-text-fill-color: #fff;
             animation: blurFadeOut 5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
             pointer-events: none;
         }
@@ -275,7 +270,7 @@
             0% { 
                 opacity: 1; 
                 filter: blur(25px) brightness(2.5); 
-                transform: scale(1.1); /* เริ่มต้นใหญ่กว่าเดิมนิดหน่อย */
+                transform: scale(1.1);
             }
             60% {
                 opacity: 0.6;
@@ -284,7 +279,7 @@
             100% { 
                 opacity: 0; 
                 filter: blur(0px) brightness(1); 
-                transform: scale(1.3); /* ขยายตัวออกจนจางหายไป */
+                transform: scale(1.3);
             }
         }
 
@@ -457,7 +452,6 @@
             to { opacity: 1; transform: translateY(0); }
         }
         .flip-enter { animation: flipIn 0.6s cubic-bezier(0.22, 1, 0.36, 1); }
-        /* 6. ตัด filter: blur(6px) ออกจากตัวเลข Countdown เพื่อไม่ให้กระตุกทุกๆ วินาที */
         @keyframes flipIn {
             0% { transform: rotateX(-90deg) scale(0.85); opacity: 0; }
             100% { transform: rotateX(0deg) scale(1); opacity: 1; }
@@ -508,7 +502,6 @@
             .orb-container { display: none; }
             .scanlines { opacity: 0.15; }
             .chromatic { animation: none; }
-            /* 7. ปิด backdrop-filter บนมือถือ เพราะมันทำให้เฟรมตกตอนเลื่อนพื้นหลัง */
             .countdown-value { 
                 backdrop-filter: none; 
                 -webkit-backdrop-filter: none; 
@@ -548,7 +541,6 @@
 
     <div class="main-content">
         <div class="logo-section">
-            <!-- เพิ่ม attribue data-text เพื่อให้ CSS หลอก Layer แสง/เบลอ ดึงตัวหนังสือไปแสดงผลได้ -->
             <div class="logo-title-main" data-text="SILENT HEAVEN">SILENT HEAVEN</div>
             <div class="logo-divider"></div>
             <div class="logo-subtitle">A Place People Forgot</div>
@@ -607,7 +599,6 @@
             dust: isMobile ? 20 : (isTouchDevice ? 35 : 70),
             particles: isMobile ? 25 : (isTouchDevice ? 50 : 100),
             canvasFPS: isMobile ? 15 : 30,
-            enableParallax: !isMobile,
             enableOrbs: !isMobile,
             enableCanvas: true
         };
@@ -772,23 +763,6 @@
             if (hours !== prevValues.hours) { hoursEl.textContent = String(hours).padStart(2, '0'); hoursEl.classList.add('flip-enter'); setTimeout(() => hoursEl.classList.remove('flip-enter'), 600); prevValues.hours = hours; }
             if (minutes !== prevValues.minutes) { minutesEl.textContent = String(minutes).padStart(2, '0'); minutesEl.classList.add('flip-enter'); setTimeout(() => minutesEl.classList.remove('flip-enter'), 600); prevValues.minutes = minutes; }
             if (seconds !== prevValues.seconds) { secondsEl.textContent = String(seconds).padStart(2, '0'); secondsEl.classList.add('flip-enter'); setTimeout(() => secondsEl.classList.remove('flip-enter'), 600); prevValues.seconds = seconds; }
-        }
-
-        // ===== PARALLAX =====
-        const bgImg = document.getElementById('bg-img');
-        if (CONFIG.enableParallax) {
-            let ticking = false;
-            document.addEventListener('mousemove', (e) => {
-                if (!ticking) {
-                    requestAnimationFrame(() => {
-                        const x = (e.clientX / window.innerWidth - 0.5) * 10;
-                        const y = (e.clientY / window.innerHeight - 0.5) * 10;
-                        bgImg.style.transform = `translateZ(0) scale(1.15) translate(${x}px, ${y}px)`;
-                        ticking = false;
-                    });
-                    ticking = true;
-                }
-            });
         }
 
         // ===== DEFERRED INITIALIZATION =====
